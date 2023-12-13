@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thiệp Mời Halloween</title>
+    <link rel="stylesheet" href="mystyle.css">
+</head>
+<body>
+    <div id="invitation">
+        <h1>Thiệp Mời Halloween</h1>
+        <p>Bạn được mời tham gia buổi tiệc Halloween với chúng tôi!</p>
+        <p>Ngày: 22 tháng 10</p>
+        <p>Thời gian: 00:00</p>
+        <p>Địa điểm: Tại nhà số 333</p>
+        <p>Sự hiện diện của bạn là niềm vinh dự của chúng tôi!</p>
+        <div id="cta">
+            <a href="#" onclick="showRegistration()">Đăng ký tham gia</a>
+        </div>
+            <iframe width="540" height="300" src="image/trailer.mp4" title="Video trailer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+
+    <!-- Contact Form -->
+    <div id="contact">
+        <form>
+            <label for="name">Họ và tên:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <input type="submit" value="Gửi">
+        </form>
+    </div>
+
+    <!-- Registration Form -->
+    <div id="registration">
+        <form>
+            <label for="eventName">Tên sự kiện:</label>
+            <input type="text" id="eventName" name="eventName" required>
+
+            <label for="participantName">Tên bạn:</label>
+            <input type="text" id="participantName" name="participantName" required>
+
+            <input type="submit" value="Đăng ký">
+        </form>
+    </div>
+
+    <script>
+        // Add sound
+        var audio = new Audio('<iframe width="560" height="315" src="https://www.youtube.com/embed/7KdqnAuzBxM?si=Bbl512vJXNyGYeoo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>');
+
+        // Function to show registration form
+        function showRegistration() {
+            audio.play();
+            document.getElementById('invitation').style.display = 'none';
+            document.getElementById('registration').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
