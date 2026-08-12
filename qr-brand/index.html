@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Công cụ tạo QR theo bộ nhận diện thương hiệu" />
+  <title>QR Bộ nhận diện thương hiệu</title>
+  <style>
+    :root {
+      --brand-blue: #0d539d;
+      --brand-orange: #fdaa45;
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6f7785;
+      --border: #e2e7ef;
+      --shadow: 0 14px 40px rgba(24, 38, 65, 0.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+    }
+    button, input, textarea, select { font: inherit; }
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-end;
+      margin-bottom: 22px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--brand-blue);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .eyebrow-dot {
+      width: 10px; height: 10px; border-radius: 999px; background: var(--brand-orange);
+    }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 44px); line-height: 1.05; }
+    .subtitle { margin: 10px 0 0; color: var(--muted); max-width: 700px; line-height: 1.6; }
+    .badge {
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+      gap: 22px;
+      align-items: start;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+    .section-title { margin: 0 0 16px; font-size: 19px; }
+    .field { margin-bottom: 16px; }
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+    label { font-size: 14px; font-weight: 700; }
+    .hint { font-size: 12px; color: var(--muted); }
+    textarea, select, input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+    textarea { min-height: 98px; resize: vertical; }
+    textarea:focus, select:focus, input:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 3px rgba(13,83,157,.10); }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .color-box {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 8px 10px;
+      background: #fff;
+    }
+    input[type="color"] { width: 38px; height: 34px; border: 0; padding: 0; background: transparent; cursor: pointer; }
+    .hex { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .range-row { display: flex; align-items: center; gap: 10px; }
+    input[type="range"] { width: 100%; accent-color: var(--brand-blue); }
+    .range-value { min-width: 58px; font-size: 13px; color: var(--muted); text-align: right; }
+    .upload {
+      border: 1.5px dashed #b9c3d1;
+      border-radius: 16px;
+      padding: 15px;
+      background: #fafbfc;
+    }
+    .upload input[type="file"] { width: 100%; }
+    .privacy-note { margin-top: 7px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .logo-preview-row {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .logo-preview-row.show { display: flex; }
+    .logo-thumb { width: 46px; height: 46px; border-radius: 10px; object-fit: contain; border: 1px solid var(--border); background: #fff; }
+    .logo-name { flex: 1; min-width: 0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mini-btn { border: 1px solid var(--border); background: #fff; border-radius: 10px; padding: 7px 9px; cursor: pointer; }
+    .preview-card { position: sticky; top: 18px; }
+    .preview-shell {
+      min-height: 400px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(45deg, #f6f7f9 25%, transparent 25%),
+        linear-gradient(-45deg, #f6f7f9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f6f7f9 75%),
+        linear-gradient(-45deg, transparent 75%, #f6f7f9 75%),
+        #fff;
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      overflow: hidden;
+      padding: 18px;
+    }
+    #qr { display: grid; place-items: center; }
+    #qr canvas, #qr svg { max-width: 100%; height: auto !important; }
+    .palette { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+    .palette-chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 999px; padding: 6px 9px; font-size: 12px; color: var(--muted); }
+    .swatch { width: 12px; height: 12px; border-radius: 4px; border: 1px solid rgba(0,0,0,.08); }
+    .actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px; }
+    .btn { border-radius: 14px; padding: 11px 13px; border: 1px solid var(--border); cursor: pointer; font-weight: 700; }
+    .btn-primary { background: var(--brand-blue); color: white; border-color: var(--brand-blue); }
+    .btn-secondary { background: #fff; color: var(--text); }
+    .btn-reset { grid-column: 1 / -1; background: #fff; color: var(--muted); }
+    .status { min-height: 22px; margin-top: 11px; text-align: center; font-size: 13px; color: var(--muted); }
+    .brand-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .summary-item { border: 1px solid var(--border); border-radius: 12px; padding: 10px; font-size: 12px; color: var(--muted); }
+    .summary-item strong { display: block; color: var(--text); margin-bottom: 3px; }
+    @media (max-width: 820px) {
+      .hero { align-items: flex-start; flex-direction: column; }
+      .layout { grid-template-columns: 1fr; }
+      .preview-card { position: static; }
+    }
+    @media (max-width: 560px) {
+      .page { width: min(100% - 20px, 1180px); padding-top: 20px; }
+      .card { border-radius: 18px; padding: 16px; }
+      .grid-2, .brand-summary { grid-template-columns: 1fr; }
+      .preview-shell { min-height: 330px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <div class="eyebrow"><span class="eyebrow-dot"></span> Brand QR Studio</div>
+        <h1>Tạo QR theo bộ nhận diện thương hiệu</h1>
+        <p class="subtitle">Tạo mã QR với màu sắc, kiểu chấm và logo riêng. Logo chỉ được xử lý ngay trên trình duyệt của bạn và không được tải lên máy chủ.</p>
+      </div>
+      <div class="badge">QR 300×300 · Error correction Q</div>
+    </header>
+
+    <div class="layout">
+      <section class="card" aria-labelledby="settings-title">
+        <h2 id="settings-title" class="section-title">Thiết lập QR</h2>
+
+        <div class="field">
+          <div class="label-row"><label for="qrData">Nội dung hoặc đường dẫn</label><span class="hint">Cập nhật tự động</span></div>
+          <textarea id="qrData">https://padlet.com/dashboard?mobile_page=Collection&amp;filter=combined_recents</textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <div class="label-row"><label for="dotsType">Kiểu điểm QR</label></div>
+            <select id="dotsType">
+              <option value="dots" selected>Chấm tròn</option>
+              <option value="rounded">Bo tròn</option>
+              <option value="classy">Classy</option>
+              <option value="classy-rounded">Classy Rounded</option>
+              <option value="square">Vuông</option>
+              <option value="extra-rounded">Bo tròn lớn</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="label-row"><label for="errorLevel">Mức sửa lỗi</label></div>
+            <select id="errorLevel">
+              <option value="L">L</option>
+              <option value="M">M</option>
+              <option value="Q" selected>Q — mặc định</option>
+              <option value="H">H</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <div class="label-row"><label>Màu điểm QR</label></div>
+            <div class="color-box"><input id="dotsColor" type="color" value="#0d539d" /><span id="dotsHex" class="hex">#0d539d</span></div>
+          </div>
+          <div class="field">
+            <div class="label-row"><label>Màu mắt QR ngoài</label></div>
+            <div class="color-box"><input id="cornerColor" type="color" value="#fdaa45" /><span id="cornerHex" class="hex">#fdaa45</span></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <div class="label-row"><label>Màu mắt QR trong</label></div>
+            <div class="color-box"><input id="cornerDotColor" type="color" value="#0d539d" /><span id="cornerDotHex" class="hex">#0d539d</span></div>
+          </div>
+          <div class="field">
+            <div class="label-row"><label>Màu nền</label></div>
+            <div class="color-box"><input id="bgColor" type="color" value="#ffffff" /><span id="bgHex" class="hex">#ffffff</span></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <div class="label-row"><label for="sizeRange">Kích thước QR</label></div>
+            <div class="range-row"><input id="sizeRange" type="range" min="200" max="800" step="10" value="300" /><span id="sizeValue" class="range-value">300 px</span></div>
+          </div>
+          <div class="field">
+            <div class="label-row"><label for="marginRange">Lề QR</label></div>
+            <div class="range-row"><input id="marginRange" type="range" min="0" max="40" step="1" value="0" /><span id="marginValue" class="range-value">0 px</span></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label-row"><label for="logoUpload">Logo thương hiệu</label><span class="hint">PNG · JPG · WebP · SVG</span></div>
+          <div class="upload">
+            <input id="logoUpload" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+            <div class="privacy-note">🔒 Logo được đọc bằng FileReader ngay trên máy của bạn. Trang web không gửi file logo đi đâu.</div>
+            <div id="logoPreviewRow" class="logo-preview-row">
+              <img id="logoThumb" class="logo-thumb" alt="Logo đã chọn" />
+              <span id="logoName" class="logo-name"></span>
+              <button id="removeLogo" type="button" class="mini-btn">Xóa</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label-row"><label for="logoSize">Kích thước logo</label><span class="hint">JSON gốc: 70%</span></div>
+          <div class="range-row"><input id="logoSize" type="range" min="0.15" max="0.70" step="0.05" value="0.70" /><span id="logoSizeValue" class="range-value">70%</span></div>
+        </div>
+
+        <div class="brand-summary" aria-label="Cấu hình nhận diện mặc định">
+          <div class="summary-item"><strong>Điểm QR</strong>#0d539d · dots</div>
+          <div class="summary-item"><strong>Mắt ngoài</strong>#fdaa45 · dot</div>
+          <div class="summary-item"><strong>Mắt trong</strong>#0d539d · dot</div>
+          <div class="summary-item"><strong>Nền</strong>#ffffff</div>
+          <div class="summary-item"><strong>Kích thước</strong>300 × 300</div>
+          <div class="summary-item"><strong>Error correction</strong>Q</div>
+        </div>
+      </section>
+
+      <aside class="card preview-card" aria-labelledby="preview-title">
+        <h2 id="preview-title" class="section-title">Xem trước QR</h2>
+        <div class="preview-shell"><div id="qr" aria-label="Mã QR xem trước"></div></div>
+        <div class="palette">
+          <span class="palette-chip"><span class="swatch" style="background:#0d539d"></span>#0d539d</span>
+          <span class="palette-chip"><span class="swatch" style="background:#fdaa45"></span>#fdaa45</span>
+          <span class="palette-chip"><span class="swatch" style="background:#ffffff"></span>#ffffff</span>
+        </div>
+        <div class="actions">
+          <button id="downloadPng" type="button" class="btn btn-primary">Tải PNG</button>
+          <button id="downloadSvg" type="button" class="btn btn-secondary">Tải SVG</button>
+          <button id="resetBrand" type="button" class="btn btn-reset">Khôi phục nhận diện mặc định</button>
+        </div>
+        <div id="status" class="status" aria-live="polite">Sẵn sàng tạo QR.</div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js"></script>
+  <script>
+    const defaults = {
+      data: 'https://padlet.com/dashboard?mobile_page=Collection&filter=combined_recents',
+      width: 300,
+      height: 300,
+      margin: 0,
+      qrOptions: { typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'Q' },
+      dotsOptions: { type: 'dots', color: '#0d539d', roundSize: true },
+      backgroundOptions: { color: '#ffffff' },
+      cornersSquareOptions: { type: 'dot', color: '#fdaa45' },
+      cornersDotOptions: { type: 'dot', color: '#0d539d' },
+      imageOptions: { hideBackgroundDots: true, imageSize: 0.7, margin: 0 }
+    };
+
+    const el = id => document.getElementById(id);
+    const controls = {
+      data: el('qrData'), dotsType: el('dotsType'), error: el('errorLevel'),
+      dotsColor: el('dotsColor'), cornerColor: el('cornerColor'), cornerDotColor: el('cornerDotColor'),
+      bgColor: el('bgColor'), size: el('sizeRange'), margin: el('marginRange'), logoSize: el('logoSize')
+    };
+    const status = el('status');
+    let logoDataUrl = '';
+
+    const qr = new QRCodeStyling({ ...defaults, type: 'canvas' });
+    qr.append(el('qr'));
+
+    function syncLabels() {
+      el('dotsHex').textContent = controls.dotsColor.value;
+      el('cornerHex').textContent = controls.cornerColor.value;
+      el('cornerDotHex').textContent = controls.cornerDotColor.value;
+      el('bgHex').textContent = controls.bgColor.value;
+      el('sizeValue').textContent = controls.size.value + ' px';
+      el('marginValue').textContent = controls.margin.value + ' px';
+      el('logoSizeValue').textContent = Math.round(Number(controls.logoSize.value) * 100) + '%';
+    }
+
+    function options() {
+      const size = Number(controls.size.value);
+      const cfg = {
+        width: size,
+        height: size,
+        type: 'canvas',
+        shape: 'square',
+        data: controls.data.value.trim() || ' ',
+        margin: Number(controls.margin.value),
+        qrOptions: { typeNumber: 0, mode: 'Byte', errorCorrectionLevel: controls.error.value },
+        dotsOptions: { type: controls.dotsType.value, color: controls.dotsColor.value, roundSize: true },
+        backgroundOptions: { color: controls.bgColor.value },
+        cornersSquareOptions: { type: 'dot', color: controls.cornerColor.value },
+        cornersDotOptions: { type: 'dot', color: controls.cornerDotColor.value },
+        imageOptions: { hideBackgroundDots: true, imageSize: Number(controls.logoSize.value), margin: 0 }
+      };
+      if (logoDataUrl) cfg.image = logoDataUrl;
+      else cfg.image = undefined;
+      return cfg;
+    }
+
+    function update(message = 'Đã cập nhật QR.') {
+      syncLabels();
+      qr.update(options());
+      status.textContent = message;
+    }
+
+    Object.values(controls).forEach(control => {
+      control.addEventListener('input', () => update());
+      control.addEventListener('change', () => update());
+    });
+
+    el('logoUpload').addEventListener('change', event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        status.textContent = 'Vui lòng chọn một file hình ảnh.';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        logoDataUrl = String(reader.result || '');
+        el('logoThumb').src = logoDataUrl;
+        el('logoName').textContent = file.name;
+        el('logoPreviewRow').classList.add('show');
+        update('Đã thêm logo vào QR.');
+      };
+      reader.onerror = () => status.textContent = 'Không thể đọc file logo.';
+      reader.readAsDataURL(file);
+    });
+
+    el('removeLogo').addEventListener('click', () => {
+      logoDataUrl = '';
+      el('logoUpload').value = '';
+      el('logoThumb').removeAttribute('src');
+      el('logoPreviewRow').classList.remove('show');
+      update('Đã xóa logo khỏi QR.');
+    });
+
+    el('downloadPng').addEventListener('click', async () => {
+      status.textContent = 'Đang tạo PNG…';
+      await qr.download({ name: 'qr-thuong-hieu', extension: 'png' });
+      status.textContent = 'Đã tải QR PNG.';
+    });
+
+    el('downloadSvg').addEventListener('click', async () => {
+      status.textContent = 'Đang tạo SVG…';
+      const svgQr = new QRCodeStyling({ ...options(), type: 'svg' });
+      await svgQr.download({ name: 'qr-thuong-hieu', extension: 'svg' });
+      status.textContent = 'Đã tải QR SVG.';
+    });
+
+    el('resetBrand').addEventListener('click', () => {
+      controls.data.value = defaults.data;
+      controls.dotsType.value = 'dots';
+      controls.error.value = 'Q';
+      controls.dotsColor.value = '#0d539d';
+      controls.cornerColor.value = '#fdaa45';
+      controls.cornerDotColor.value = '#0d539d';
+      controls.bgColor.value = '#ffffff';
+      controls.size.value = '300';
+      controls.margin.value = '0';
+      controls.logoSize.value = '0.70';
+      logoDataUrl = '';
+      el('logoUpload').value = '';
+      el('logoThumb').removeAttribute('src');
+      el('logoPreviewRow').classList.remove('show');
+      update('Đã khôi phục bộ nhận diện mặc định.');
+    });
+
+    syncLabels();
+  </script>
+</body>
+</html>
